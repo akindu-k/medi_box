@@ -19,19 +19,26 @@ void setup(){
 
     display.display();
     delay(2000);
-
     display.clearDisplay();
-    display.setTextSize(1);
-    display.setTextColor(SSD1306_WHITE);
-    display.setCursor(0,0);
-    display.println(F("Welcome to Medibox!"));
 
-    display.display();
-    delay(2000);
+    print_line("Welcome to Medobox", 10, 20, 2);
 }
 
 void loop(){
-    
+
+}
+
+void print_line(String text, int text_size, int row, int column){
+
+    display.clearDisplay();
+    display.setTextSize(text_size);
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(row,column);
+    display.println(text);
+
+    display.display();
+    delay(2000);
+
 }
 
 
