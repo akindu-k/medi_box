@@ -14,6 +14,9 @@ int hours = 0;
 int minutes = 0;
 int seconds = 0;
 
+unsigned long timeNow = 0;
+unsigned long timeLast = 0;
+
 void setup(){
     Serial.begin(9600);
 
@@ -31,11 +34,12 @@ void setup(){
 }
 
 void loop(){
+    update_time();
     print_time_now();
 }
 
 void print_line(String text, int column, int row, int text_size){
-
+    display.clearDisplay();
     display.setTextSize(text_size);
     display.setTextColor(SSD1306_WHITE);
     display.setCursor(column,row);
@@ -51,6 +55,27 @@ void print_time_now(void){
     print_line(String(minutes), 60, 0, 2);
     print_line(":", 80, 0, 2);
     print_line(String(seconds), 90, 0, 2);
+}
+
+void update_time(void){
+    timeNow = millis()/1000; // seconds passed from boot up
+    seconds = timeNow - timeLast;
+
+    if (seconds >= 60){
+        minutes++;
+        timeLast += 60;
+    }
+
+    if (minutes == 60){
+        hours++;
+        minutes = 0;
+    }
+
+    if (hours == 24){
+        days++;
+        hours = 0;
+    }
+
 }
 
 
