@@ -131,7 +131,7 @@ void ring_alarm() {
     display.clearDisplay();
 }
 
-
+// handles all the cases
 void update_time_with_check_alarm(void) {
     update_time(); // Update the time variables
     print_time_now(); // Display the current time
