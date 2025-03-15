@@ -26,7 +26,7 @@ void setup(){
     delay(2000);
     display.clearDisplay();
 
-    print_line("Welcome to Medobox", 10, 20, 2);
+    print_line("Welcome to Medobox!", 0, 0, 2);
     display.clearDisplay();
 }
 
@@ -34,11 +34,11 @@ void loop(){
     print_time_now();
 }
 
-void print_line(String text, int text_size, int row, int column){
+void print_line(String text, int column, int row, int text_size){
 
     display.setTextSize(text_size);
     display.setTextColor(SSD1306_WHITE);
-    display.setCursor(row,column);
+    display.setCursor(column,row);
     display.println(text);
     display.display();
 }
