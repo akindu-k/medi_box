@@ -10,6 +10,9 @@
 #define BUZZER 5
 #define LED_1 15
 #define PB_CANCEL 34
+#define PB_OK 32
+#define PB_UP 33
+#define PB_DOWN 35
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
@@ -39,10 +42,17 @@ int B = 494;
 int C_H = 523;
 int notes[] = {C, D, E, F, G, A, B, C_H};
 
+int current_mode = 0;
+int max_modes = 4;
+String modes[] = {"1 - Set Time", "2 - Set Alarm 1", "3 - Set Alarm 2", "4 - Disable Alarms"};
+
 void setup() {
     pinMode(BUZZER, OUTPUT);
     pinMode(LED_1, OUTPUT);
     pinMode(PB_CANCEL,INPUT);
+    pinMode(PB_OK,INPUT);
+    pinMode(PB_UP,INPUT);
+    pinMode(PB_DOWN,INPUT);
     Serial.begin(9600);
 
     // Initialize the OLED display
@@ -57,11 +67,16 @@ void setup() {
 
     // Display welcome message
     print_line("Welcome to Medobox!", 0, 0, 2);
+    delay(1000);
     display.clearDisplay();
 }
 
 void loop() {
     update_time_with_check_alarm();
+    if (digitalRead(PB_OK) == LOW){
+        delay(200);
+        go_to_menu();
+    }
 }
 
 void print_line(String text, int column, int row, int text_size) {
@@ -143,5 +158,243 @@ void update_time_with_check_alarm(void) {
                 alarm_triggered[i] = true;
             }
         }
+    }
+}
+
+int wait_for_button_press(){
+    while (true){
+        if (digitalRead(PB_UP) == LOW){
+            delay(200);
+            while (digitalRead(PB_UP) == LOW); // Wait for button release
+            return PB_UP;
+        }
+        else if (digitalRead(PB_DOWN) == LOW){
+            delay(200);
+            while (digitalRead(PB_DOWN) == LOW); // Wait for button release
+            return PB_DOWN;
+        }
+        else if (digitalRead(PB_OK) == LOW){
+            delay(200);
+            while (digitalRead(PB_OK) == LOW); // Wait for button release
+            return PB_OK;
+        }
+        else if (digitalRead(PB_CANCEL) == LOW){
+            delay(200);
+            while (digitalRead(PB_CANCEL) == LOW); // Wait for button release
+            return PB_CANCEL;
+        }
+
+        update_time();  // Keep updating time while waiting
+    }
+}
+
+
+
+void go_to_menu(void){
+    while (digitalRead(PB_CANCEL) == HIGH){
+        display.clearDisplay();
+        print_line(modes[current_mode],0,0,2);
+
+        int pressed = wait_for_button_press();
+
+        if (pressed == PB_UP){
+            delay(200);
+            current_mode += 1;
+            current_mode = current_mode % max_modes;
+        }
+
+        else if (pressed == PB_DOWN){
+            delay(200);
+            current_mode -= 1;
+            if (current_mode<0){
+                current_mode = max_modes - 1;
+            }
+        }
+
+        else if (pressed == PB_OK){
+            delay(200);
+            run_mode(current_mode);
+        }
+
+        else if (pressed == PB_CANCEL){
+            delay(200);
+            break;
+        }
+
+
+
+    }
+}
+
+void set_time(){
+    int temp_hour = hours;
+
+    while (true){
+        display.clearDisplay();
+        print_line("Enter hour: " + String(temp_hour), 0, 0, 2);
+    
+        int pressed = wait_for_button_press();
+    
+        if (pressed == PB_UP){
+            delay(200);
+            temp_hour++;
+            temp_hour %= 24;
+        }
+    
+        else if (pressed == PB_DOWN){
+            delay(200);
+            temp_hour--;
+            if (temp_hour<0){
+                temp_hour = 23;
+            }
+        }
+    
+        else if (pressed == PB_OK){
+            delay(200);
+            hours = temp_hour;
+            break;
+        }
+    
+        else if (pressed == PB_CANCEL){
+            delay(200);
+            break;
+        }    
+
+    }
+
+
+    int temp_minute = minutes;
+
+    while (true){
+        display.clearDisplay();
+        print_line("Enter minute: " + String(temp_minute), 0, 0, 2);
+    
+        int pressed = wait_for_button_press();
+    
+        if (pressed == PB_UP){
+            delay(200);
+            temp_minute++;
+            temp_minute %= 60;
+        }
+    
+        else if (pressed == PB_DOWN){
+            delay(200);
+            temp_minute--;
+            if (temp_minute<0){
+                temp_minute = 59;
+            }
+        }
+    
+        else if (pressed == PB_OK){
+            delay(200);
+            minutes = temp_minute;
+            break;
+        }
+    
+        else if (pressed == PB_CANCEL){
+            delay(200);
+            break;
+        }
+    
+
+    }
+
+    display.clearDisplay();
+    print_line("Time is set",0,0,2);
+    delay(1000);
+
+}
+
+void set_alarm(int alarm){
+    int temp_hour = alarm_hours[alarm];
+
+    while (true){
+        display.clearDisplay();
+        print_line("Enter hour: " + String(temp_hour), 0, 0, 2);
+    
+        int pressed = wait_for_button_press();
+    
+        if (pressed == PB_UP){
+            delay(200);
+            temp_hour++;
+            temp_hour %= 24;
+        }
+    
+        else if (pressed == PB_DOWN){
+            delay(200);
+            temp_hour--;
+            if (temp_hour<0){
+                temp_hour = 23;
+            }
+        }
+    
+        else if (pressed == PB_OK){
+            delay(200);
+            alarm_hours[alarm] = temp_hour;
+            break;
+        }
+    
+        else if (pressed == PB_CANCEL){
+            delay(200);
+            break;
+        }    
+
+    }
+
+
+    int temp_minute = alarm_minutes[alarm];
+
+    while (true){
+        display.clearDisplay();
+        print_line("Enter minute: " + String(temp_minute), 0, 0, 2);
+    
+        int pressed = wait_for_button_press();
+    
+        if (pressed == PB_UP){
+            delay(200);
+            temp_minute++;
+            temp_minute %= 60;
+        }
+    
+        else if (pressed == PB_DOWN){
+            delay(200);
+            temp_minute--;
+            if (temp_minute<0){
+                temp_minute = 59;
+            }
+        }
+    
+        else if (pressed == PB_OK){
+            delay(200);
+            alarm_minutes[alarm] = temp_minute;
+            break;
+        }
+    
+        else if (pressed == PB_CANCEL){
+            delay(200);
+            break;
+        }
+    
+
+    }
+
+    display.clearDisplay();
+    print_line("Alarm is set",0,0,2);
+    delay(1000);
+
+}
+
+void run_mode(int mode){
+    if (mode == 0){
+        set_time();
+    }
+
+    else if (mode == 1 || mode == 2){
+        set_alarm(mode-1);
+      
+    }
+
+    else if (mode == 3){
+        alarm_enabled = false;
     }
 }
