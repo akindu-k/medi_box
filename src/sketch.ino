@@ -1,6 +1,7 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <DHTesp.h>
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
@@ -13,8 +14,11 @@
 #define PB_OK 32
 #define PB_UP 33
 #define PB_DOWN 35
+#define DHTPIN 12
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+// DHTesp dhtSensor;
+DHTesp dhtSensor;
 
 // Global variables
 int days = 0;
@@ -55,6 +59,8 @@ void setup() {
     pinMode(PB_DOWN,INPUT);
     Serial.begin(9600);
 
+    dhtSensor.setup(DHTPIN,DHTesp::DHT22);
+
     // Initialize the OLED display
     if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
         Serial.println(F("SSD1306 allocation failed"));
@@ -77,6 +83,7 @@ void loop() {
         delay(200);
         go_to_menu();
     }
+    check_temp();
 }
 
 void print_line(String text, int column, int row, int text_size) {
@@ -396,5 +403,26 @@ void run_mode(int mode){
 
     else if (mode == 3){
         alarm_enabled = false;
+    }
+}
+
+void check_temp(void){
+    TempAndHumidity data = dhtSensor.getTempAndHumidity();
+    if (data.temperature > 35){
+        display.clearDisplay();
+        print_line("TEMP HIGH",0,40,1);
+    }
+    else if (data.temperature < 25){
+        display.clearDisplay();
+        print_line("TEMP LOW",0,40,1);
+    }
+
+    if (data.humidity > 40){
+        display.clearDisplay();
+        print_line("HUMIDITY HIGH",0,50,1);
+    }
+    else if (data.humidity < 20){
+        display.clearDisplay();
+        print_line("HUMIDITY LOW",0,50,1);
     }
 }
