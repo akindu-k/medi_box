@@ -2,6 +2,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <DHTesp.h>
+#include <WiFi.h>
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
@@ -15,6 +16,10 @@
 #define PB_UP 33
 #define PB_DOWN 35
 #define DHTPIN 12
+
+#define NTP_SERVER     "pool.ntp.org"
+#define UTC_OFFSET     0
+#define UTC_OFFSET_DST 0
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 // DHTesp dhtSensor;
@@ -69,6 +74,21 @@ void setup() {
 
     display.display();
     delay(2000); // Display splash screen for 2 seconds
+
+    WiFi.begin("Wokwi-GUEST", "", 6);
+    while (WiFi.status() != WL_CONNECTED) {
+      delay(250);
+      display.clearDisplay();
+      print_line("Connecting To WIFI",0,0,2);
+   
+    }
+
+    display.clearDisplay();
+    print_line("Connected To WIFI",0,0,2);
+
+    configTime(UTC_OFFSET, UTC_OFFSET_DST, NTP_SERVER);
+
+
     display.clearDisplay();
 
     // Display welcome message
@@ -107,23 +127,24 @@ void print_time_now(void) {
 }
 
 void update_time(void) {
-    timeNow = millis() / 1000; // Get the number of seconds since the program started
-    seconds = timeNow - timeLast; // Calculate elapsed seconds since last update
+    struct tm timeinfo;
+    getLocalTime(&timeinfo);
 
-    if (seconds >= 60) {
-        minutes++; // Increment minutes if 60 seconds have passed
-        timeLast += 60; // Adjust timeLast to account for the elapsed minute
-    }
+    char timeHour[3];
+    strftime(timeHour,3,"%H",&timeinfo);
+    hours = atoi(timeHour);
 
-    if (minutes == 60) {
-        hours++; // Increment hours if 60 minutes have passed
-        minutes = 0; // Reset minutes
-    }
+    char timeMinute[3];
+    strftime(timeMinute,3,"%M",&timeinfo);
+    minutes = atoi(timeMinute);
 
-    if (hours == 24) {
-        days++; // Increment days if 24 hours have passed
-        hours = 0; // Reset hours
-    }
+    char timeSecond[3];
+    strftime(timeSecond,3,"%S",&timeinfo);
+    seconds = atoi(timeSecond);
+
+    char timeDay[3];
+    strftime(timeDay,3,"%d",&timeinfo);
+    days = atoi(timeDay);
 }
 
 void ring_alarm() {
