@@ -35,6 +35,17 @@ bool snooze_active = false;
 unsigned long snooze_time = 0;
 int LED2_blink;
 
+int n_notes = 8;
+int C = 262;
+int D = 294;
+int E = 330;
+int F = 349;
+int G = 392;
+int A = 440;
+int B = 494;
+int C_H = 523;
+int notes[] = {C, D, E, F, G, A, B, C_H};
+
 // Function to display text at specified position and size
 void print_line(String text, int x, int y, int size) {
   display.setTextSize(size);
@@ -59,17 +70,34 @@ void print_time_now() {
   print_line("Temperature: " + String(data.temperature) + " C", 0, 20, 1);
   print_line("Humidity:    " + String(data.humidity) + " %", 0, 30, 1);
 
-  // Check for environmental warnings
-  boolean temp_warning = data.temperature < 24 || data.temperature > 32;
-  boolean humidity_warning = data.humidity < 65 || data.humidity > 80;
 
+
+  boolean temp_low = data.temperature < 24;
+  boolean temp_high = data.temperature > 32;
+
+  boolean humidity_low = data.humidity < 65;
+  boolean humidity_high = data.humidity > 80;
   // Display appropriate warning messages
-  if (temp_warning) 
-      print_line("Temperature Warning!", 0, 40, 1);
-  if (humidity_warning) 
-      print_line("Humidity Warning!", 0, 50, 1);
+  if (temp_low){ 
+      print_line("Temperature Low!", 0, 40, 1);
+  }
+
+  if (temp_high){
+    print_line("Temperature High!", 0, 40, 1);
+  }
+  if (humidity_low){
+    print_line("Humidity Low!", 0, 50, 1);
+  }
+  
+  if (humidity_high){
+    print_line("Humidity High!", 0, 50, 1);
+  }
+      
 
   display.display();
+
+  boolean temp_warning = temp_low || temp_high;
+  boolean humidity_warning = humidity_low || humidity_high; 
 
   // Handle warning indicators
   if (temp_warning || humidity_warning) {
@@ -115,11 +143,24 @@ void ring_alarm() {
 
   // Visual indicator
   digitalWrite(LED_1, HIGH);
+  
+  bool break_happened = false;
 
-  // Wait for user response
-  while (true) {
-      play_melody();
-      digitalWrite(LED_1, !digitalRead(LED_1));
+  // Play melody and handle user response
+  while (!break_happened) {
+      for (int i = 0; i < n_notes; i++) {
+          if (digitalRead(PB_CANCEL) == LOW) {
+              delay(200);
+              break_happened = true;
+              break;
+          }
+          tone(BUZZER, notes[i]);
+          delay(500);
+          noTone(BUZZER);
+          delay(2);
+      }
+
+      digitalWrite(LED_1, !digitalRead(LED_1)); // Toggle LED
 
       // Handle snooze request
       if (digitalRead(PB_OK) == LOW) {
@@ -133,17 +174,14 @@ void ring_alarm() {
           delay(1000);
           break;
       }
-
-      // Handle dismissal
-      if (digitalRead(PB_CANCEL) == LOW) {
-          display.clearDisplay();
-          print_line("Reminder", 10, 20, 2);
-          print_line("Dismissed", 10, 40, 2);
-          display.display();
-          delay(1000);
-          break;
-      }
   }
+
+  // Handle dismissal
+  display.clearDisplay();
+  print_line("Reminder", 10, 20, 2);
+  print_line("Dismissed", 10, 40, 2);
+  display.display();
+  delay(1000);
 
   // Reset alert state
   noTone(BUZZER);
