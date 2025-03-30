@@ -128,7 +128,7 @@ void play_melody() {
       tone(BUZZER, melody[i]);
       delay(noteDurations[i]);
       noTone(BUZZER);
-      delay(50);
+      delay(2);
   }
 }
 
