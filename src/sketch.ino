@@ -35,16 +35,6 @@ bool snooze_active = false;
 unsigned long snooze_time = 0;
 int LED2_blink;
 
-int n_notes = 8;
-int C = 262;
-int D = 294;
-int E = 330;
-int F = 349;
-int G = 392;
-int A = 440;
-int B = 494;
-int C_H = 523;
-int notes[] = {C, D, E, F, G, A, B, C_H};
 
 // Function to display text at specified position and size
 void print_line(String text, int x, int y, int size) {
@@ -132,63 +122,52 @@ void play_melody() {
   }
 }
 
-// Function for medication reminder alert
 void ring_alarm() {
-  display.clearDisplay();
-  print_line("MEDICINE", 25, 5, 2);
-  print_line("TIME!", 40, 20, 2);
-  print_line("OK: Remind in 5 min", 10, 40, 1);
-  print_line("Cancel: Dismiss", 10, 50, 1);
-  display.display();
-
-  // Visual indicator
-  digitalWrite(LED_1, HIGH);
+    display.clearDisplay();
+    print_line("MEDICINE", 25, 5, 2);
+    print_line("TIME!", 40, 20, 2);
+    print_line("OK: Remind in 5 min", 10, 40, 1);
+    print_line("Cancel: Dismiss", 10, 50, 1);
+    display.display();
   
-  bool break_happened = false;
-
-  // Play melody and handle user response
-  while (!break_happened) {
-      for (int i = 0; i < n_notes; i++) {
-          if (digitalRead(PB_CANCEL) == LOW) {
-              delay(200);
-              break_happened = true;
-              break;
-          }
-          tone(BUZZER, notes[i]);
-          delay(500);
-          noTone(BUZZER);
-          delay(2);
-      }
-
-      digitalWrite(LED_1, !digitalRead(LED_1)); // Toggle LED
-
-      // Handle snooze request
-      if (digitalRead(PB_OK) == LOW) {
-          snooze_active = true;
-          snooze_time = millis() + 300000; // 5 minutes delay
-
-          display.clearDisplay();
-          print_line("Reminder set for", 10, 20, 1);
-          print_line("5 minutes later", 10, 30, 1);
-          display.display();
-          delay(1000);
-          break;
-      }
+    // Visual indicator
+    digitalWrite(LED_1, HIGH);
+  
+    // Wait for user response
+    while (true) {
+        play_melody();
+        digitalWrite(LED_1, !digitalRead(LED_1));
+  
+        // Handle snooze request
+        if (digitalRead(PB_OK) == LOW) {
+            snooze_active = true;
+            snooze_time = millis() + 300000; // 5 minutes delay
+  
+            display.clearDisplay();
+            print_line("Alarm snoozed for", 10, 20, 1);
+            print_line("5 minutes.", 10, 30, 1);
+            display.display();
+            delay(1000);
+            break;
+        }
+  
+        // Handle dismissal
+        if (digitalRead(PB_CANCEL) == LOW) {
+            display.clearDisplay();
+            print_line("Alarm", 10, 20, 2);
+            print_line("Snoozed", 10, 40, 2);
+            display.display();
+            delay(1000);
+            break;
+        }
+    }
+  
+    // Reset alert state
+    noTone(BUZZER);
+    digitalWrite(LED_1, LOW);
+    display.clearDisplay();
+    display.display();
   }
-
-  // Handle dismissal
-  display.clearDisplay();
-  print_line("Reminder", 10, 20, 2);
-  print_line("Dismissed", 10, 40, 2);
-  display.display();
-  delay(1000);
-
-  // Reset alert state
-  noTone(BUZZER);
-  digitalWrite(LED_1, LOW);
-  display.clearDisplay();
-  display.display();
-}
 
 // Function to monitor time and check for scheduled reminders
 void update_time_with_check_alarm() {
@@ -288,12 +267,12 @@ void set_alarm() {
       display.clearDisplay();
       
       if (selecting_alarm) {
-          print_line("Select Reminder Slot", 5, 0, 1);
-          print_line((alarm_index == 0 ? "→ " : "  ") + String("Reminder 1"), 0, 20, 1);
-          print_line((alarm_index == 1 ? "→ " : "  ") + String("Reminder 2"), 0, 30, 1);
+          print_line("Select Alarm Slot", 5, 0, 1);
+          print_line((alarm_index == 0 ? "-> " : "  ") + String("Alarm 1"), 0, 20, 1);
+          print_line((alarm_index == 1 ? "-> " : "  ") + String("Alarm 2"), 0, 30, 1);
       } else {
-          print_line("Reminder " + String(alarm_index + 1), 10, 0, 2);
-          print_line(String(new_hours) + ":" + (new_minutes < 10 ? "0" : "") + String(new_minutes), 30, 20, 2);
+          print_line("Alarm " + String(alarm_index + 1), 10, 0, 1);
+          print_line(String(new_hours) + ":" + (new_minutes < 10 ? "0" : "") + String(new_minutes), 30, 20, 1);
           print_line(setting_minutes ? "Setting Minutes" : "Setting Hours", 0, 40, 1);
       }
       display.display();
@@ -310,15 +289,27 @@ void set_alarm() {
       }
 
       // Handle DOWN button
-      if (digitalRead(PB_DOWN) == LOW) {
-          if (selecting_alarm) {
-              alarm_index = (alarm_index == 0) ? 1 : 0;
-          } else {
-              if (!setting_minutes) new_hours = (new_hours == 0) ? 23 : new_hours - 1;
-              else new_minutes = (new_minutes == 0) ? 59 : new_minutes - 1;
-          }
-          delay(200);
-      }
+      if (digitalRead(PB_DOWN) == LOW) {  // Check if the "down" button is pressed
+        delay(50);  // Debounce delay
+        if (digitalRead(PB_DOWN) == LOW) {  // Ensure button is still pressed after debounce
+            if (selecting_alarm) {  
+                // Toggle between two alarm indexes (assuming only 0 and 1 exist)
+                alarm_index = (alarm_index == 0) ? 1 : 0;
+            } else {  
+                // If not selecting an alarm, adjust time settings
+                if (!setting_minutes) {  
+                    // Adjust hours (wraps around from 0 to 23)
+                    new_hours = (new_hours == 0) ? 23 : new_hours - 1;
+                } else {  
+                    // Adjust minutes (wraps around from 0 to 59)
+                    new_minutes = (new_minutes == 0) ? 59 : new_minutes - 1;
+                }
+            }
+            delay(200);  // Delay to prevent rapid changes
+            while (digitalRead(PB_DOWN) == LOW) { delay(10); }  // Wait for button release
+        }
+    }
+    
 
       // Handle OK button
       if (digitalRead(PB_OK) == LOW) {
@@ -346,16 +337,16 @@ void set_alarm() {
 void view_alarms() {
   while (true) {
       display.clearDisplay();
-      print_line("Scheduled Reminders", 0, 0, 1);
+      print_line("Current Alarms", 0, 0, 1);
 
       for (int i = 0; i < 2; i++) {
           if (alarm_hours[i] != -1) {
-              String alarmText = "Rem " + String(i + 1) + ": " + 
+              String alarmText = "Alarm " + String(i + 1) + ": " + 
                                  String(alarm_hours[i]) + ":" + 
                                  (alarm_minutes[i] < 10 ? "0" : "") + String(alarm_minutes[i]);
               print_line(alarmText, 0, 15 + (i * 10), 1);
           } else {
-              print_line("Rem " + String(i + 1) + ": Not Set", 0, 15 + (i * 10), 1);
+              print_line("Alarm " + String(i + 1) + ": Not Set", 0, 15 + (i * 10), 1);
           }
       }
 
@@ -376,15 +367,15 @@ void delete_alarm() {
 
   while (true) {
       display.clearDisplay();
-      print_line("Remove Reminder", 0, 0, 1);
+      print_line("Deleted Alarm", 0, 0, 1);
       
       for (int i = 0; i < 2; i++) {
           if (i == alarm_index) {
-              print_line("→ Rem " + String(i + 1) + ": " + 
+              print_line("-> Alarm " + String(i + 1) + ": " + 
                          String(alarm_hours[i]) + ":" + 
                          (alarm_minutes[i] < 10 ? "0" : "") + String(alarm_minutes[i]), 0, 15 + (i * 10), 1);
           } else {
-              print_line("Rem " + String(i + 1) + ": " + 
+              print_line("Alarm " + String(i + 1) + ": " + 
                          String(alarm_hours[i]) + ":" + 
                          (alarm_minutes[i] < 10 ? "0" : "") + String(alarm_minutes[i]), 0, 15 + (i * 10), 1);
           }
@@ -406,7 +397,7 @@ void delete_alarm() {
           alarm_minutes[alarm_index] = -1;
           
           display.clearDisplay();
-          print_line("Reminder", 0, 20, 2);
+          print_line("Alarm", 0, 20, 2);
           print_line("Removed", 0, 40, 2);
           display.display();
           delay(1000);
@@ -430,33 +421,33 @@ void go_to_menu() {
 
       // Display menu options with selection indicator
       if (menu_option == 1) {
-          print_line("→ Time Zone Config", 0, 0, 1);
+          print_line("* Set Time Zone", 0, 0, 1);
       } else {
-          print_line("1. Time Zone Config", 0, 0, 1);
+          print_line("1. Set Time Zone", 0, 0, 1);
       }
 
       if (menu_option == 2) {
-          print_line("→ Set Reminders", 0, 10, 1);
+          print_line("* Set Alarms", 0, 10, 1);
       } else {
-          print_line("2. Set Reminders", 0, 10, 1);
+          print_line("2. Set Alarms", 0, 10, 1);
       }
 
       if (menu_option == 3) {
-          print_line("→ View Reminders", 0, 20, 1);
+          print_line("* View Alarms", 0, 20, 1);
       } else {
-          print_line("3. View Reminders", 0, 20, 1);
+          print_line("3. View Alarms", 0, 20, 1);
       }
 
       if (menu_option == 4) {
-          print_line("→ Remove Reminder", 0, 30, 1);
+          print_line("* Delete Alarms", 0, 30, 1);
       } else {
-          print_line("4. Remove Reminder", 0, 30, 1);
+          print_line("4. Delete Alarms", 0, 30, 1);
       }
 
       if (menu_option == 5) {
-          print_line("→ Exit Menu", 0, 40, 1);
+          print_line("* Exit", 0, 40, 1);
       } else {
-          print_line("5. Exit Menu", 0, 40, 1);
+          print_line("5. Exit", 0, 40, 1);
       }
 
       display.display();
@@ -528,8 +519,6 @@ void setup() {
     // Show network connection info
     display.clearDisplay();
     print_line("WiFi Connected", 0, 0, 1);
-    print_line("SSID: " + WiFi.SSID(), 0, 20, 1);
-    print_line("IP: " + WiFi.localIP().toString(), 0, 10, 1);
     display.display();
     delay(2000);
     
