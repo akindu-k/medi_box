@@ -14,7 +14,13 @@
       "left": 49.8,
       "attrs": { "volume": "0.1" }
     },
-    { "type": "wokwi-led", "id": "led1", "top": 198, "left": -34.6, "attrs": { "color": "red" } },
+    {
+      "type": "wokwi-led",
+      "id": "led1",
+      "top": 284.4,
+      "left": -44.2,
+      "attrs": { "color": "red" }
+    },
     {
       "type": "wokwi-resistor",
       "id": "r1",
@@ -108,7 +114,6 @@
     [ "bb1:tn.49", "esp:GND.1", "black", [ "v0" ] ],
     [ "bb1:tp.50", "bb1:bp.50", "red", [ "v-0.34", "h42.46", "v173.35" ] ],
     [ "bb1:tn.50", "bb1:bn.50", "black", [ "v-1.04", "h48.28", "v176.84" ] ],
-    [ "bb1:28t.e", "bb1:tn.19", "black", [ "v5.61", "h-43.05" ] ],
     [ "bb1:38t.e", "bb1:tn.26", "black", [ "v12.69", "h-46.36" ] ],
     [ "bb1:45t.a", "esp:D5", "orange", [ "v0" ] ],
     [ "bb1:35t.a", "esp:D15", "blue", [ "v0" ] ],
@@ -129,14 +134,10 @@
     [ "bb2:28t.a", "bb2:tn.23", "black", [ "v0" ] ],
     [ "esp:D32", "bb2:16t.a", "green", [ "h0" ] ],
     [ "dht1:SDA", "esp:D12", "green", [ "v14.91", "h156", "v-92.32" ] ],
-    [ "oled1:GND", "bb1:53t.d", "", [ "$bb" ] ],
-    [ "oled1:VCC", "bb1:54t.d", "", [ "$bb" ] ],
-    [ "oled1:SCL", "bb1:55t.d", "", [ "$bb" ] ],
-    [ "oled1:SDA", "bb1:56t.d", "", [ "$bb" ] ],
+    [ "bb2:tp.24", "dht1:VCC", "red", [ "v0" ] ],
+    [ "bb1:tn.2", "dht1:GND", "black", [ "v0" ] ],
     [ "bz1:1", "bb1:38t.c", "", [ "$bb" ] ],
     [ "bz1:2", "bb1:39t.c", "", [ "$bb" ] ],
-    [ "led1:A", "bb1:29t.c", "", [ "$bb" ] ],
-    [ "led1:C", "bb1:28t.c", "", [ "$bb" ] ],
     [ "r1:1", "bb1:39t.e", "", [ "$bb" ] ],
     [ "r1:2", "bb1:45t.e", "", [ "$bb" ] ],
     [ "r2:1", "bb1:29t.e", "", [ "$bb" ] ],
@@ -165,8 +166,14 @@
     [ "r5:2", "bb2:16b.i", "", [ "$bb" ] ],
     [ "r6:1", "bb2:1b.i", "", [ "$bb" ] ],
     [ "r6:2", "bb2:7b.i", "", [ "$bb" ] ],
-    [ "bb2:tp.24", "dht1:VCC", "red", [ "v0" ] ],
-    [ "bb1:tn.2", "dht1:GND", "black", [ "v0" ] ]
+    [ "oled1:GND", "bb1:53t.d", "", [ "$bb" ] ],
+    [ "oled1:VCC", "bb1:54t.d", "", [ "$bb" ] ],
+    [ "oled1:SCL", "bb1:55t.d", "", [ "$bb" ] ],
+    [ "oled1:SDA", "bb1:56t.d", "", [ "$bb" ] ],
+    [ "bb1:tn.18", "bb1:27b.i", "black", [ "v0" ] ],
+    [ "led1:A", "bb1:28b.j", "", [ "$bb" ] ],
+    [ "led1:C", "bb1:27b.j", "", [ "$bb" ] ],
+    [ "bb1:29t.d", "bb1:28b.f", "red", [ "v0" ] ]
   ],
   "dependencies": {}
 }
