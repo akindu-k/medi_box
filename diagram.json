@@ -1,17 +1,10 @@
 {
   "version": 1,
-  "author": "Thisuka Wijenayaka",
+  "author": "Akindu Kalhan",
   "editor": "wokwi",
   "parts": [
     { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 0, "left": -4.76, "attrs": {} },
     { "type": "wokwi-dht22", "id": "dht1", "top": -105.3, "left": 157.8, "attrs": {} },
-    {
-      "type": "wokwi-buzzer",
-      "id": "bz1",
-      "top": 50.4,
-      "left": -161.4,
-      "attrs": { "volume": "0.1" }
-    },
     {
       "type": "wokwi-photoresistor-sensor",
       "id": "ldr1",
@@ -27,8 +20,6 @@
     [ "dht1:GND", "esp:GND.1", "black", [ "v0" ] ],
     [ "dht1:VCC", "esp:3V3", "red", [ "v19.2", "h-172.95" ] ],
     [ "dht1:SDA", "esp:15", "green", [ "v0" ] ],
-    [ "bz1:2", "esp:12", "red", [ "v0" ] ],
-    [ "bz1:1", "esp:GND.1", "black", [ "v0" ] ],
     [ "ldr1:GND", "esp:GND.2", "black", [ "h0" ] ],
     [ "ldr1:AO", "esp:34", "green", [ "h38.4", "v47.3" ] ],
     [ "ldr1:VCC", "esp:3V3", "red", [ "h28.8", "v38.4" ] ],

@@ -89,7 +89,7 @@ void loop() {
   
   // Temperature update and publish
   updateTemperature();
-  mqttClient.publish("ENTC-ADMIN-TEMP", tempAr);
+  mqttClient.publish("HOME-TEMP-AKINDU", tempAr);
   
   // Light sampling routine
   updateLightSample();
@@ -145,7 +145,7 @@ void processLightData() {
     // Format and publish light data
     char buf[8];
     dtostrf(windowParams.intensity, 1, 3, buf); // "0.xxx"
-    mqttClient.publish("light/data", buf);
+    mqttClient.publish("HOME-LIGHT-AKINDU", buf);
     
     // Reset counters
     timingData.sumLight = 0;
@@ -247,21 +247,21 @@ void receiveCallbackFunction(char* topic, byte* payload, unsigned int length) {
       scheduleData.scheduledOnTime = atol(payloadCharAr);
     }
   }
-  else if (strcmp(topic, "light/ts") == 0) {
+  else if (strcmp(topic, "SAMPLING-INTERVAL-AKINDU") == 0) {
     timingData.samplingInterval = atol(payloadCharAr) * 1000UL;  // seconds → ms
     Serial.println(timingData.samplingInterval);
   }
-  else if (strcmp(topic, "light/tu") == 0) {
+  else if (strcmp(topic, "SENDING-INTERVAL-AKINDU") == 0) {
     timingData.sendingInterval = atol(payloadCharAr) * 1000UL;  // seconds → ms
     Serial.println(timingData.sendingInterval);
   }
-  else if (strcmp(topic, "servo/offset") == 0) {
+  else if (strcmp(topic, "SERVO-OFFSET-AKINDU") == 0) {
     windowParams.thetaOffset = constrain(atof(payloadCharAr), 0.0f, 120.0f);
   }
-  else if (strcmp(topic, "servo/gamma") == 0) {
+  else if (strcmp(topic, "GAMMA-AKINDU") == 0) {
     windowParams.gammaFactor = constrain(atof(payloadCharAr), 0.0f, 1.0f);      
   }
-  else if (strcmp(topic, "servo/Tmed") == 0) {
+  else if (strcmp(topic, "TMED-AKINDU") == 0) {
     windowParams.Tmed = constrain(atof(payloadCharAr), 10.0f, 40.0f);      
   }
 }
@@ -273,13 +273,13 @@ void connectToBroker() {
       Serial.println("connected");
       
       // Subscribe to topics
-      mqttClient.subscribe("ENTC-ADMIN-MAIN-ON-OFF");
-      mqttClient.subscribe("ENTC-ADMIN-SCH-ON");
-      mqttClient.subscribe("light/ts");
-      mqttClient.subscribe("light/tu");
-      mqttClient.subscribe("servo/offset");
-      mqttClient.subscribe("servo/gamma");
-      mqttClient.subscribe("servo/Tmed");
+      // mqttClient.subscribe("ENTC-ADMIN-MAIN-ON-OFF");
+      // mqttClient.subscribe("ENTC-ADMIN-SCH-ON");
+      mqttClient.subscribe("SAMPLING-INTERVAL-AKINDU");
+      mqttClient.subscribe("SENDING-INTERVAL-AKINDU");
+      mqttClient.subscribe("SERVO-OFFSET-AKINDU");
+      mqttClient.subscribe("GAMMA-AKINDU");
+      mqttClient.subscribe("TMED-AKINDU");
     } else {
       Serial.print("failed rc=");
       Serial.print(mqttClient.state());
@@ -309,3 +309,12 @@ void setupWifi() {
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
 }
+
+
+
+
+
+
+
+
+
