@@ -6,7 +6,6 @@
 #include <ESP32Servo.h>
 
 #define DHT_PIN 15
-#define BUZZER 12
 #define LDR_PIN 34               // ADC1_CH6, maps 0–4095 :contentReference[oaicite:0]{index=0} 
 #define SERVO_PIN  14  
 
@@ -52,8 +51,8 @@ void checkSchedule();
 void setup() {
   Serial.begin(115200);
 
-  pinMode(BUZZER, OUTPUT);
-  digitalWrite(BUZZER, LOW);
+ 
+
   pinMode(LDR_PIN, INPUT);
 
   setupWifi();
@@ -161,13 +160,7 @@ unsigned long getTime() {
   return timeClient.getEpochTime();
 }
 
-void buzzerOn(bool on) {
-  if (on) {
-    tone(BUZZER, 256);
-  } else {
-    noTone(BUZZER);
-  }
-}
+
 
 void checkSchedule() {
   unsigned long currentTime = getTime();
