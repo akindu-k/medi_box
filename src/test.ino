@@ -12,8 +12,8 @@
 
 
 
-unsigned long samplingInterval = 5000;   // default ts = 5 s  
-unsigned long sendingInterval  = 120000; // default tu = 120 s  
+unsigned long samplingInterval = 1; //5000;   // default ts = 5 s  
+unsigned long sendingInterval  =  10;    // 120000; // default tu = 120 s  
 unsigned long lastSampleTime = 0;  
 unsigned long lastSendTime   = 0;  
 uint32_t sumLight = 0;  
@@ -105,16 +105,32 @@ void loop() {
     sampleCount = 0;
     // compute the window angle θ
     float T     = dhtSensor.getTempAndHumidity().temperature;
+
+
     float ratio = float(samplingInterval) / float(sendingInterval);
     if (ratio <= 0) ratio = 1.0f;
-
+    
+    // Use a modified log factor to prevent zero multiplication
+    float logFactor;
+    if (ratio > 0.95 && ratio < 1.05) {
+      // If ratio is close to 1, use a small non-zero value instead of log(ratio)
+      logFactor = 0.5;  // This ensures movement even when ratio=1
+    } else {
+      logFactor = log(ratio);
+    }
+    
     float theta = thetaOffset
       + (180.0f - thetaOffset)
         * intensity
         * gammaFactor
-        * log(ratio)
+        * logFactor  // Using our modified factor instead of log(ratio)
         * (T / Tmed);
 
+    if (theta < 0.0f) {
+      theta = 0.0f;
+    } else if (theta > 180.0f) {
+      theta = 180.0f;
+    }
     windowServo.write(theta);
 
     // (optional) debug-print
