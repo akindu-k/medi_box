@@ -74,8 +74,7 @@
  void updateTemperature();
  void handleLightSampling();
  void handleServoControl();
- unsigned long getTime();
- void checkSchedule();
+
  
  /**
   * Setup function - initializes all components
@@ -116,7 +115,7 @@
    handleLightSampling();
    
    // Check scheduled events
-   checkSchedule();
+
    
    delay(1000);
  }
@@ -299,23 +298,3 @@
  }
  
 
- /**
-  * Returns current time from NTP server
-  */
- unsigned long getTime() {
-   timeClient.update();
-   return timeClient.getEpochTime();
- }
- 
- /**
-  * Checks if a scheduled event should be triggered
-  */
- void checkSchedule() {
-   unsigned long currentTime = getTime();
-   if (isScheduledON && currentTime >= scheduledOnTime) {
-     isScheduledON = false;
-     mqttClient.publish(TOPIC_PUBLISH_MAIN_ON_OFF, "1");
-     mqttClient.publish(TOPIC_PUBLISH_SCHEDULED_ON, "0");
-     Serial.println("Schedule ON");
-   }
- }
